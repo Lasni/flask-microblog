@@ -4,8 +4,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
-    ENV = "development"
-    DEVELOPMENT = True
     SECRET_KEY = os.environ.get("SECRET_KEY") or "mysecretkey"
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL"
