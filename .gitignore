@@ -4,3 +4,4 @@ venv
 .flaskenv
 .env
 app.db
+logs
