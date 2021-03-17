@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
+from flask_moment import Moment
 from logging.handlers import SMTPHandler, RotatingFileHandler
 from config import Config
 
@@ -18,6 +19,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
 bootstrap = Bootstrap(app)
+moment = Moment(app)
 
 # registering files with flask after the app instance is created to avoid circular imports
 from app import routes, models, errors
