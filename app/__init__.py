@@ -11,12 +11,11 @@ from flask_moment import Moment
 from flask_babel import Babel, lazy_gettext as _l
 from config import Config
 
-
+db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = "auth.login"
 login_manager.login_message = _l("Please log in to access this page.")
-db = SQLAlchemy()
-migrate = Migrate()
 mail = Mail()
 bootstrap = Bootstrap()
 moment = Moment()
