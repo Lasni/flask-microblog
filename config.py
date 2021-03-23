@@ -20,3 +20,4 @@ class Config(object):
     ADMINS = (os.environ.get("MY_EMAIL"),)
     LANGUAGES = ["en", "es"]
     MS_TRANSLATOR_KEY = os.environ.get("MS_TRANSLATOR_KEY")
+    ELASTICSEARCH_URL = os.environ.get("ELASTICSEARCH_URL")
