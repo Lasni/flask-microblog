@@ -76,5 +76,48 @@
             $(destEl).text("{{ _('Error: Could not contact server.') }}");
         })
     }
+
+    // jQuery for bootstrap popover
+    $(function () {
+        let timer = null
+        let xhr = null
+        $(".user_popup").hover(
+            //handlerIn
+            function (e) {
+                const el = $(e.currentTarget)
+                timer = setTimeout(() => {
+                    timer = null
+                    xhr = $.ajax("/user/" + el.first().text().trim() + "/popup").done(
+                        function (data) {
+                            xhr = null
+                            el.popover({
+                                trigger: "manual",
+                                html: true,
+                                animation: false,
+                                container: el,
+                                content: data,
+                            }).popover("show")
+                            flask_moment_render_all()
+                        }
+                    )
+                }, 1000)
+            },
+            //handlerOut
+            function (e) {
+                const el = $(e.currentTarget)
+                if (timer) {
+                    clearTimeout(timer)
+                    timer = null
+                }
+                else if (xhr) {
+                    xhr.abort()
+                    xhr = null
+                }
+                else {
+                    el.popover("destroy")
+                }
+            }
+        )
+    })
 </script>
 {% endblock %}
