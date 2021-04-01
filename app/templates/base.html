@@ -34,7 +34,16 @@
                 {% if current_user.is_anonymous %}
                 <li><a href="{{ url_for('auth.login') }}">{{ _('Login') }}</a></li>
                 {% else %}
-                <li><a href="{{ url_for('main.messages') }}">{{ _('Messages') }}</a></li>
+                <li>
+                    <a href="{{ url_for('main.messages') }}">
+                        {{ _('Messages') }}
+                        {% set new_messages = current_user.new_messages() %}
+                        <span id="message_count" class="badge"
+                            style="visibility: {% if new_messages %} visible {% else %} hidden {% endif %};">
+                            {{ new_messages }}
+                        </span>
+                    </a>
+                </li>
                 <li><a href="{{ url_for('main.user', username=current_user.username) }}">{{ _('Profile') }}</a></li>
                 <li><a href="{{ url_for('auth.logout') }}">{{ _('Logout') }}</a></li>
                 {% endif %}
@@ -64,7 +73,8 @@
 {{ moment.include_moment() }}
 {{ moment.lang(g.locale) }}
 <script>
-    function translate(sourceEl, destEl, sourceLang, destLang) {
+    // function for translating posts to english
+    translate = (sourceEl, destEl, sourceLang, destLang) => {
         $(destEl).html("<img src='{{ url_for('static', filename='loading.gif') }}'>")
         // $(destEl).html('<img src="{{ url_for('static', filename='loading.gif') }}">');
         $.post("/translate", {
@@ -120,5 +130,29 @@
             }
         )
     })
+
+    // function for updating the visibility of the message_count badge
+    setMessageCount = (n) => {
+        $("#message_count").text(n)
+        $("#message_count").css("visibility", n ? "visible" : "hidden")
+    }
+
+    // function for long-polling notifications (for new messages)
+    {% if current_user.is_authenticated %}
+    $(() => {
+        let since = 0;
+        setInterval(function () {
+            $.ajax("{{ url_for('main.notifications') }}?since=" + since).done(
+                (notifications) => {
+                    for (let i = 0; i < notifications.length; i++) {
+                        if (notifications[i].name == 'unread_message_count')
+                            setMessageCount(notifications[i].data);
+                        since = notifications[i].timestamp;
+                    }
+                }
+            );
+        }, 10000);
+    });
+    {% endif %}
 </script>
 {% endblock %}
