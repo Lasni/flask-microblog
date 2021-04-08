@@ -55,6 +55,18 @@
 
 {% block content %}
 <div class="container">
+    {% if current_user.is_authenticated %}
+    {% with tasks = current_user.get_tasks_in_progress() %}
+    {% if tasks %}
+    {% for task in tasks %}
+    <div class="alert alert-success" role="alert">
+        {{ task.description }}
+        <span id="{{ task.id }}-progress">{{ task.get_progress() }}</span>%
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    {% endif %}
     {% with messages = get_flashed_messages() %}
     {% if messages %}
     {% for message in messages %}
@@ -73,6 +85,11 @@
 {{ moment.include_moment() }}
 {{ moment.lang(g.locale) }}
 <script>
+    // function to dynamically update task progress
+    setTaskProgress = (task_id, progress) => {
+        $("#" + task_id + "-progress").text(progress)
+    }
+
     // function for translating posts to english
     translate = (sourceEl, destEl, sourceLang, destLang) => {
         $(destEl).html("<img src='{{ url_for('static', filename='loading.gif') }}'>")
@@ -145,8 +162,16 @@
             $.ajax("{{ url_for('main.notifications') }}?since=" + since).done(
                 (notifications) => {
                     for (let i = 0; i < notifications.length; i++) {
-                        if (notifications[i].name == 'unread_message_count')
-                            setMessageCount(notifications[i].data);
+                        switch (notifications[i].name) {
+                            case "unread_message_count":
+                                setMessageCount(notifications[i].data);
+                                break
+                            case "task_progress":
+                                setTaskProgress(
+                                    notifications[i].data.task_id,
+                                    notifications[i].data.progress)
+                                break
+                        }
                         since = notifications[i].timestamp;
                     }
                 }

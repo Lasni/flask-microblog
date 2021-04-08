@@ -7,3 +7,4 @@ app.db
 logs
 translations
 messages.pot
+dump.rdb
