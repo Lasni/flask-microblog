@@ -94,6 +94,35 @@ class User(UserMixin, db.Model):
     notifications = db.relationship("Notification", backref="user", lazy="dynamic")
     tasks = db.relationship("Task", backref="user", lazy="dynamic")
 
+    # convert User object to Python dictionary (REST API)
+    def to_dict(self, include_email=False):
+        data = {
+            "id": self.id,
+            "username": self.username,
+            "last_seen": self.last_seen.isoformat() + "Z",
+            "about_me": self.about_me,
+            "post_count": self.posts.count(),
+            "follower_count": self.followers.count(),
+            "followed_count": self.followed.count(),
+            "_links": {
+                "self": url_for("api.get_user", id=self.id),
+                "followers": url_for("api.get_followers", id=self.id),
+                "followed": url_for("api.get_followed", id=self.id),
+                "avatar": self.avatar(128),
+            },
+        }
+        if include_email:
+            data["email"] = self.email
+        return data
+
+    # convert a user representation to a User object (REST API)
+    def from_dict(self, data, new_user=False):
+        for field in ["username", "email", "about_me"]:
+            if field in data:
+                setattr(self, field, data[field])
+            if new_user and "password" in data:
+                self.set_password(data["password"])
+
     @staticmethod
     def verify_reset_password_token(token):
         try:
